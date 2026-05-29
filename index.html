@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard Nilai TKA</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=DM+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05080f;
+    --bg2: #0b1120;
+    --bg3: #111827;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --gold: #fbbf24;
+    --silver: #94a3b8;
+    --bronze: #cd7c45;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --glow: rgba(59,130,246,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG GRID */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 48px 24px 32px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .header-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(24px, 5vw, 52px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #3b82f6 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 20px;
+    text-align: center;
+  }
+
+  .stat-pill .val {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-pill .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* MAIN */
+  main {
+    position: relative;
+    z-index: 10;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 16px 80px;
+  }
+
+  /* SEARCH + CONTROLS */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-wrap {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    width: 16px; height: 16px;
+  }
+
+  #searchInput {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px 12px 40px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  #searchInput:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+  }
+
+  #searchInput::placeholder { color: var(--muted); }
+
+  .sort-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .sort-btn:hover {
+    border-color: var(--accent);
+    background: rgba(59,130,246,0.1);
+  }
+
+  .sort-btn svg { width: 14px; height: 14px; }
+
+  .result-count {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: rgba(59,130,246,0.08);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 16px;
+    text-align: left;
+  }
+
+  th:first-child { text-align: center; width: 60px; }
+  th.num-col { text-align: right; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  tbody tr:hover {
+    background: rgba(59,130,246,0.05);
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 13px 16px;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  td:first-child { text-align: center; }
+  td.num-col {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+
+  /* RANK BADGE */
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--muted);
+  }
+
+  .rank-badge.r1 { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.4); color: var(--gold); }
+  .rank-badge.r2 { background: rgba(148,163,184,0.15); border-color: rgba(148,163,184,0.4); color: var(--silver); }
+  .rank-badge.r3 { background: rgba(205,124,69,0.15); border-color: rgba(205,124,69,0.4); color: var(--bronze); }
+
+  /* SPECIAL ROWS */
+  tr.highlight-creator td { background: rgba(139,92,246,0.06); }
+  tr.highlight-creator td:last-child { }
+
+  .creator-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(90deg, rgba(139,92,246,0.2), rgba(59,130,246,0.2));
+    border: 1px solid rgba(139,92,246,0.4);
+    border-radius: 100px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #a78bfa;
+    margin-left: 8px;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+  }
+
+  /* SCORE PILLS */
+  .score-pill {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .grade-istimewa { background: rgba(251,191,36,0.15); color: var(--gold); border: 1px solid rgba(251,191,36,0.3); }
+  .grade-baik { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+  .grade-memadai { background: rgba(59,130,246,0.1); color: #93c5fd; border: 1px solid rgba(59,130,246,0.2); }
+  .grade-kurang { background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+
+  /* TOTAL SCORE BAR */
+  .total-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+  }
+
+  .total-val {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .total-bar-bg {
+    width: 80px;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .total-bar {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  /* NAMA CELL */
+  .nama-cell { font-weight: 500; color: var(--text); font-size: 13px; }
+
+  /* NO RESULTS */
+  .no-result {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--muted);
+  }
+
+  .no-result svg { width: 48px; height: 48px; margin: 0 auto 16px; display: block; opacity: 0.3; }
+  .no-result p { font-size: 14px; }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 10;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 40px 24px 32px;
+    text-align: center;
+  }
+
+  .footer-inner { max-width: 600px; margin: 0 auto; }
+
+  .footer-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .social-links {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .social-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn-ig {
+    background: linear-gradient(135deg, rgba(225,48,108,0.15), rgba(254,95,1,0.15), rgba(193,53,132,0.15));
+    border-color: rgba(225,48,108,0.3);
+    color: #f9a8d4;
+  }
+
+  .btn-ig:hover {
+    background: linear-gradient(135deg, rgba(225,48,108,0.25), rgba(254,95,1,0.25), rgba(193,53,132,0.25));
+    border-color: rgba(225,48,108,0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(225,48,108,0.15);
+  }
+
+  .btn-tiktok {
+    background: rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.1);
+    color: var(--text);
+  }
+
+  .btn-tiktok:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .credits-box {
+    background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(59,130,246,0.08));
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 16px;
+  }
+
+  .credits-box p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .credits-box strong { color: #a78bfa; }
+
+  .footer-copy { font-size: 11px; color: var(--muted); opacity: 0.5; }
+
+  /* MOBILE RESPONSIVENESS */
+  @media (max-width: 640px) {
+    header { padding: 32px 16px 24px; }
+    h1 { font-size: 22px; }
+    .stats-row { gap: 10px; }
+    .stat-pill { padding: 7px 12px; }
+    .stat-pill .val { font-size: 15px; }
+    .stat-pill .lbl { font-size: 10px; }
+
+    main { padding: 20px 10px 60px; }
+
+    th, td { padding: 10px 8px; }
+
+    .total-bar-bg { width: 50px; }
+    .nama-cell { font-size: 12px; }
+    .score-pill { font-size: 10px; padding: 3px 6px; }
+    .sort-btn span { display: none; }
+    .sort-btn { padding: 12px 14px; }
+    .creator-tag { display: none; }
+    .rank-badge { width: 26px; height: 26px; font-size: 10px; }
+  }
+
+  @media (max-width: 400px) {
+    th, td { padding: 9px 6px; }
+    .nama-cell { font-size: 11px; }
+    .score-pill { font-size: 9px; padding: 2px 5px; }
+    th:first-child { width: 36px; }
+  }
+
+  /* HIGHLIGHT SEARCH */
+  mark {
+    background: rgba(251,191,36,0.3);
+    color: var(--gold);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  /* SCROLL TO TOP */
+  #scrollTop {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 100;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+  }
+
+  #scrollTop.visible { opacity: 1; transform: translateY(0); }
+  #scrollTop:hover { background: #2563eb; }
+  #scrollTop svg { width: 18px; height: 18px; }
+
+  /* POPUP OVERLAY */
+  #popupOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeInBg 0.4s ease;
+  }
+
+  @keyframes fadeInBg {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  #popupBox {
+    background: var(--bg2);
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 24px;
+    padding: 36px 28px 28px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(139,92,246,0.2), 0 24px 80px rgba(0,0,0,0.5);
+    animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #popupBox::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%;
+    transform: translateX(-50%);
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .popup-emoji {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+    animation: bounce 1.5s ease infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .popup-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #e2e8f0, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .popup-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .popup-desc strong { color: var(--text); }
+
+  .popup-socials {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .popup-social-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .popup-social-btn::after {
+    content: '↗';
+    position: absolute;
+    right: 16px;
+    font-size: 14px;
+    opacity: 0.6;
+  }
+
+  .popup-social-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .popup-btn-ig {
+    background: linear-gradient(135deg, rgba(225,48,108,0.18), rgba(254,95,1,0.18), rgba(193,53,132,0.18));
+    border-color: rgba(225,48,108,0.35);
+    color: #fda4af;
+  }
+
+  .popup-btn-ig:hover {
+    background: linear-gradient(135deg, rgba(225,48,108,0.3), rgba(254,95,1,0.3), rgba(193,53,132,0.3));
+    border-color: rgba(225,48,108,0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(225,48,108,0.2);
+  }
+
+  .popup-btn-tiktok {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.12);
+    color: var(--text);
+  }
+
+  .popup-btn-tiktok:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+  }
+
+  .popup-close-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    padding: 10px 24px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+
+  .popup-close-btn:hover {
+    border-color: rgba(255,255,255,0.2);
+    color: var(--text);
+    background: rgba(255,255,255,0.04);
+  }
+
+  .popup-overlay-exit {
+    animation: fadeOutBg 0.3s ease forwards;
+  }
+
+  .popup-overlay-exit #popupBox {
+    animation: popOut 0.3s ease forwards;
+  }
+
+  @keyframes fadeOutBg {
+    to { opacity: 0; }
+  }
+
+  @keyframes popOut {
+    to { opacity: 0; transform: scale(0.9) translateY(10px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- POPUP FOLLOW SOSMED -->
+<div id="popupOverlay">
+  <div id="popupBox">
+    <span class="popup-emoji">👋</span>
+    <div class="popup-title">Hei, Sebelum Lanjut!</div>
+    <p class="popup-desc">Website leaderboard ini dibuat oleh <strong>M. Aziz Jaya</strong> (Kelas 9A).<br>Yuk support dengan follow sosial medianya! 🙏</p>
+    <div class="popup-socials">
+      <a href="https://www.instagram.com/axis_pp_ra/" target="_blank" rel="noopener" class="popup-social-btn popup-btn-ig">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+        Follow Instagram · @axis_pp_ra
+      </a>
+      <a href="https://www.tiktok.com/@axisbutnot" target="_blank" rel="noopener" class="popup-social-btn popup-btn-tiktok">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.29 6.29 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.67a8.17 8.17 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/>
+        </svg>
+        Follow TikTok · @axisbutnot
+      </a>
+    </div>
+    <button class="popup-close-btn" onclick="closePopup()">Lanjut ke Leaderboard →</button>
+  </div>
+</div>
+
+<header>
+  <div class="header-badge">📊 Hasil TKA 2025</div>
+  <h1>LEADERBOARD<br>NILAI TKA</h1>
+  <p class="subtitle">Matematika &amp; Bahasa Indonesia · Diurutkan dari Terbesar ke Terkecil</p>
+  <div class="stats-row">
+    <div class="stat-pill">
+      <div class="val" id="statTotal">–</div>
+      <div class="lbl">Total Siswa</div>
+    </div>
+    <div class="stat-pill">
+      <div class="val" id="statAvg">–</div>
+      <div class="lbl">Rata-rata Total</div>
+    </div>
+    <div class="stat-pill">
+      <div class="val" id="statTop">–</div>
+      <div class="lbl">Nilai Tertinggi</div>
+    </div>
+    <div class="stat-pill">
+      <div class="val" id="statLow">–</div>
+      <div class="lbl">Nilai Terendah</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="controls">
+    <div class="search-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Cari nama siswa..." autocomplete="off">
+    </div>
+    <button class="sort-btn" id="sortBtn" onclick="toggleSort()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
+      </svg>
+      <span id="sortLabel">Terbesar → Terkecil</span>
+    </button>
+    <div class="result-count" id="resultCount"></div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nama Siswa</th>
+          <th>Matematika</th>
+          <th>Bhs. Indonesia</th>
+          <th class="num-col">Total</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="no-result" id="noResult" style="display:none">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <p>Nama siswa tidak ditemukan.<br>Coba kata kunci yang berbeda.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-title">Follow Media Sosial</div>
+    <div class="social-links">
+      <a href="https://www.instagram.com/axis_pp_ra/" target="_blank" rel="noopener" class="social-btn btn-ig">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+        @axis_pp_ra
+      </a>
+      <a href="https://www.tiktok.com/@axisbutnot" target="_blank" rel="noopener" class="social-btn btn-tiktok">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.29 6.29 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.67a8.17 8.17 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/>
+        </svg>
+        @axisbutnot
+      </a>
+    </div>
+    <div class="credits-box">
+      <p>Website ini dibuat oleh <strong>M. Aziz Jaya</strong> — Kelas <strong>9A</strong><br>
+      Data nilai TKA Matematika &amp; Bahasa Indonesia</p>
+    </div>
+    <p class="footer-copy">© 2025 · Leaderboard Nilai TKA</p>
+  </div>
+</footer>
+
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Kembali ke atas">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+const raw = [
+  {nama:"BILQISYAH SHILVANA DEVY",mtk:"30.00",bind:"66.67",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"YUSUF AL - BARA",mtk:"23.33",bind:"50.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"Revan Raka Pratama",mtk:"26.67",bind:"36.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"NATA NADYA",mtk:"43.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"CHERYL CANTIKA AYU",mtk:"23.33",bind:"70.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"ERGIAN ALPARES",mtk:"26.67",bind:"46.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"FISCA MAYSA PUTRI",mtk:"43.33",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NOVITA ARIYANTI",mtk:"46.67",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ZAHRA ADELIA",mtk:"23.33",bind:"70.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"Ferdinan Alif",mtk:"43.33",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"MUHAMAD FAREL PRATAMA",mtk:"40.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"AISHA NUR SALSABILA",mtk:"36.67",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"Ayu Chandra Meisa",mtk:"46.67",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RAISSA CALYA AURELLIA",mtk:"33.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Aftabil El Fathi Anggoro",mtk:"46.67",bind:"86.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ARELL JALENSKA WIJAYA",mtk:"30.00",bind:"53.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"GIANDRA SERUNTING AZ ZAHRA",mtk:"53.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MALLDI ALVIAN",mtk:"50.00",bind:"86.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"RAFA JAYA PRAKOSO",mtk:"36.67",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Novita Sari",mtk:"40.00",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"AZRA AURA KIRANA",mtk:"40.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"SAFIRA TIKA KHAIRUNNISA",mtk:"36.67",bind:"86.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"MUHAMAD ILHAM MAULANA",mtk:"26.67",bind:"53.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"MOHAMAD OKTA ABIZAR",mtk:"30.00",bind:"66.67",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"DINDA ZASKIA PUTRI",mtk:"40.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FAJAR MUHAMAD RISKI",mtk:"43.33",bind:"26.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"NAIRIN NUR ALIF VIA",mtk:"53.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"CANTIKA TIARA HAQ",mtk:"30.00",bind:"50.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"MUHAMAD IQBAL",mtk:"46.67",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"MARINA ULA AKZIA",mtk:"33.33",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"AFIFA SAHIRA",mtk:"40.00",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Irfan Zaki Almer",mtk:"20.00",bind:"70.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"RYLHAM ERPANDI",mtk:"43.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KELVIN ALVIANO",mtk:"33.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KAKA ANDIKA PRATAMA",mtk:"33.33",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"YULIA LARASATI",mtk:"50.00",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"RAIHAN HAFIST AL MAZID",mtk:"26.67",bind:"33.33",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"MUHAMMAD FADZAN MAULANA",mtk:"50.00",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Azka Nazmi Hafiz",mtk:"33.33",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ADZKIAH NARA NIKEYSHA",mtk:"36.67",bind:"83.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ARSYA BIMA GHAFARA",mtk:"40.00",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"SURYANI NUR ARIFAH",mtk:"53.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KANIYA SENJA SAFHIRA",mtk:"43.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"WULAN JESIKA RIZKI PRATAMA",mtk:"40.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KHALISHA ZAHRA RIYADI",mtk:"40.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Evano Putra Pratama",mtk:"36.67",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"DEVA AULIA PUTRI",mtk:"43.33",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Raffa Ardian",mtk:"56.67",bind:"63.33",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"BEZITA BIMBING DJOFARI",mtk:"50.00",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"DEWI AYU SAFITRI",mtk:"46.67",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MUHAMAD ARIF DISKA FAHREZI",mtk:"43.33",bind:"86.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"NAYRA DANDIA AYSIVA",mtk:"56.67",bind:"86.67",gMtk:"Baik",gBind:"Baik"},
+  {nama:"DAFFA ARYADINATA",mtk:"60.00",bind:"50.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"Muhammad Bintang Al - Arsy",mtk:"43.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KHANAYA ZASKIYA ALZAHRA",mtk:"43.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Naufal Alghiffari",mtk:"26.67",bind:"36.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"Lutfi Hanifah Arum Sari",mtk:"36.67",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Muhammad Fahreza Prayogi",mtk:"60.00",bind:"80.00",gMtk:"Baik",gBind:"Baik"},
+  {nama:"ZAHWA EKA SAFITRI",mtk:"40.00",bind:"43.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"CLARISSA PUTRI AURELLA",mtk:"30.00",bind:"80.00",gMtk:"Kurang",gBind:"Baik"},
+  {nama:"SYAQIRA SYIVA ANNAZWA",mtk:"46.67",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"REVAN ADI NATA",mtk:"53.33",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"BA'ADILLA SAFITRI",mtk:"56.67",bind:"70.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"MAUDY FEBLIA",mtk:"50.00",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ARMAN ADIRA",mtk:"43.33",bind:"43.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"KURNIA RAHMA DHANI",mtk:"56.67",bind:"76.67",gMtk:"Baik",gBind:"Baik"},
+  {nama:"CLARA FIRDA OTISTA",mtk:"40.00",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"HANI VIRESTA",mtk:"63.33",bind:"86.67",gMtk:"Baik",gBind:"Baik"},
+  {nama:"MUHAMMAD TEGAR DWI ARDIAN",mtk:"36.67",bind:"90.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"NISA AISA AFRILIA",mtk:"43.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NARAYA SAFIRA AL KHALIFI",mtk:"36.67",bind:"86.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"DWI ANISA FEBRIANI",mtk:"30.00",bind:"70.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"ERDI RAMADHANI",mtk:"46.67",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"CHAYSAR DEWA ALFAIRUS AKBAR",mtk:"36.67",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RADITIAN SURYA PRATAMA",mtk:"43.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FIQRY FERNANDA",mtk:"33.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"SHIFANA NOER KHOTIFAH",mtk:"36.67",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ALFARID RIYANDI",mtk:"26.67",bind:"63.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"NEHA SALSA PUTRI",mtk:"56.67",bind:"56.67",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"MU'AMMAR FARRAS WASI",mtk:"46.67",bind:"83.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"INTAN DWI HERMALIZA",mtk:"30.00",bind:"70.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"Muhammad Kenza Raditya",mtk:"30.00",bind:"63.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"Calista Anindita",mtk:"50.00",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"REYHAN ARYA PRATAMA",mtk:"60.00",bind:"76.67",gMtk:"Baik",gBind:"Baik"},
+  {nama:"Nadya Callysta",mtk:"40.00",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RAHMA HAFIZHA PUTRI",mtk:"36.67",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"M. Ridho Duha Fajri Yandra",mtk:"26.67",bind:"53.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"Dzakiyyah Kanaya Putri",mtk:"40.00",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"Insyani Nurhasanah",mtk:"50.00",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"AHMAD RAFIT USTADI",mtk:"36.67",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ADINDA NUR AISYAH",mtk:"33.33",bind:"20.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Enda Timanta Bukit",mtk:"46.67",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ASHYFFA PRIMADHANI",mtk:"50.00",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"GHANI KRISNANDO",mtk:"46.67",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Iqbal Khoiru Ramadan",mtk:"30.00",bind:"63.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"AURELIA RAHMALA PUTRI",mtk:"33.33",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"FANNYZA AGNESYA",mtk:"36.67",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ALVIN SINAR ROSY",mtk:"33.33",bind:"33.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Damar Setiawan",mtk:"36.67",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ANDINI SESILIA",mtk:"50.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"REKA DEVIAN RAHMA",mtk:"36.67",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"CLARA CHELSYA NUNANG",mtk:"33.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RAHESA SEPTIAN",mtk:"46.67",bind:"83.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"SARAH QUEENSHA ZAHIRAH",mtk:"60.00",bind:"56.67",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"AVATAR BILAL ABRAR",mtk:"40.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"AMANDA INGKA SILFIANA",mtk:"33.33",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"CHIKA NADIA BALKIS",mtk:"33.33",bind:"43.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"MUHAMMAD SAHRUL HAMZAH",mtk:"46.67",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"GENTA SAPUTRA WIJAYA",mtk:"30.00",bind:"40.00",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"DIKA RAMADHONI",mtk:"46.67",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"REFI SEPTA SAPUTRA",mtk:"26.67",bind:"73.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"CAHAYA AMELIA PUTRI",mtk:"20.00",bind:"46.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"SYACKE NAVEEZA SANDIA",mtk:"33.33",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"SILVIA RINDI YANI",mtk:"43.33",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"NADIA PUTRI NUR PRATAMA",mtk:"30.00",bind:"63.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"ARJUNA NAUFAL SYAHREZA",mtk:"23.33",bind:"30.00",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"NOFAL BAAHIR",mtk:"26.67",bind:"43.33",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"DESPA NUR'AINI",mtk:"46.67",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"M. FAHRI FADILLA",mtk:"26.67",bind:"40.00",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"M. ALYFIAN HAFIF",mtk:"20.00",bind:"73.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"Rizky Zulian Saputra",mtk:"36.67",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"BUNGA ALLYA",mtk:"40.00",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FADHIL RAYYA WIJAYA",mtk:"30.00",bind:"73.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"MUHAMMAD NAUFAL FIRMADANA",mtk:"43.33",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"GHANI NUGRAHA",mtk:"46.67",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"Azizah Keysha Fani",mtk:"40.00",bind:"43.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"HAMIRA ZALYA SAPUTRI",mtk:"43.33",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Cahya Sapitri",mtk:"36.67",bind:"33.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"TANZILA FASTABAQISY MAFAAZA",mtk:"40.00",bind:"43.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"AYU PUJI NING LESTARI",mtk:"56.67",bind:"73.33",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"FAULA HANU PRASASTI",mtk:"36.67",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"MUHAMMAD ASKHABUL KAFI",mtk:"36.67",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"RISQI QOIRUN NIDZAM",mtk:"40.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ARYA WIGUNA",mtk:"50.00",bind:"83.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ERIK JANUARDA",mtk:"50.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"JESSICA RANA PUTRI",mtk:"23.33",bind:"60.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"KEYLA AURORA AINUN",mtk:"43.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Anindya Aurana Salsabila",mtk:"33.33",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"REYVAND BAHREN",mtk:"46.67",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RIZKY BIMA BARSAKTI",mtk:"60.00",bind:"70.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"GENN CHESA RACKASIWI",mtk:"50.00",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Mutiara",mtk:"40.00",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ZEAN ZASKIA PANGESTU",mtk:"26.67",bind:"40.00",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"GISHEILLA KAUSABILAH",mtk:"56.67",bind:"70.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"CITRA MANZILLA",mtk:"53.33",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NAUFAL AZKA FADHILA",mtk:"50.00",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ZAVIER NUR ATHALLAH RAISSA",mtk:"36.67",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KAYZA PRABOWO",mtk:"56.67",bind:"46.67",gMtk:"Baik",gBind:"Kurang"},
+  {nama:"DIMAS PUTRA FARBI",mtk:"43.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"SAFA KHAIRIYA",mtk:"46.67",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ARDI WAHYU WICAKSONO",mtk:"56.67",bind:"80.00",gMtk:"Baik",gBind:"Baik"},
+  {nama:"SALSA NAYLA HENIARZAH",mtk:"30.00",bind:"73.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"ZAHRA ANNISSYIFA",mtk:"36.67",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"SUCI AULIA",mtk:"50.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MUHAMMAD FADAIL OBAMA",mtk:"60.00",bind:"76.67",gMtk:"Baik",gBind:"Baik"},
+  {nama:"ARIEF FADILLAH GHOFAR",mtk:"60.00",bind:"60.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"Talita Quini Arifatunisa",mtk:"50.00",bind:"90.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"SASKIA RAINA HAFIZAH",mtk:"50.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"DHIKA ANORAGHA GAVICKY",mtk:"43.33",bind:"93.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"MERRY IRAWATI",mtk:"40.00",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"BIA ADICAL",mtk:"50.00",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"KAYLA RAHMA SAWITRI",mtk:"50.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"SHELA PARSA RINJANI",mtk:"73.33",bind:"86.67",gMtk:"Baik",gBind:"Baik"},
+  {nama:"M. AZIZ JAYA",mtk:"53.33",bind:"86.67",gMtk:"Memadai",gBind:"Baik",isCreator:true},
+  {nama:"Arkana El Fathi Anggoro",mtk:"46.67",bind:"80.00",gMtk:"Kurang",gBind:"Baik"},
+  {nama:"Ruri Deah Ayu Ramadhani",mtk:"43.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"VELDA DISA AZALIA",mtk:"36.67",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RIZKY JAYA MAHENDRA",mtk:"36.67",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ANNISA KIRANA DEWI",mtk:"50.00",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FIRDA ANNAURA SAHDA",mtk:"36.67",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"WILIAM ARYANDO PHINGKAREZO SIDABALOK",mtk:"63.33",bind:"66.67",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"Khaliz Naufal Arasikh",mtk:"53.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"CINTA VEGA PUTRI",mtk:"26.67",bind:"40.00",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"FANI FEBRIA CAHYA",mtk:"33.33",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Rafki Widya Nofansyah",mtk:"33.33",bind:"23.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ANGGUN AFRIZA",mtk:"33.33",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Alfais Rizki Ramadhan",mtk:"53.33",bind:"33.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"MUHAMMAD ALBI RAHMADAN",mtk:"23.33",bind:"36.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"ANISA DWI AULIA",mtk:"56.67",bind:"53.33",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"MEILISA INDAH KUSUMA",mtk:"40.00",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"SYIFA ARIRA SUKMA",mtk:"36.67",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ZELDA FITRIAN ARTISA",mtk:"40.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MUHAMMAD ALE BIGUNA",mtk:"33.33",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ZAKIYAH RAHARJO",mtk:"63.33",bind:"90.00",gMtk:"Baik",gBind:"Baik"},
+  {nama:"MUHAMMAD ARINDRA NANDANI",mtk:"36.67",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"OKTA NUR INDAH",mtk:"43.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Shifa Putri Qinantasya",mtk:"13.33",bind:"56.67",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"Fernando Aditama",mtk:"20.00",bind:"70.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"ALDI FERDIANSYAH",mtk:"26.67",bind:"40.00",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"ANGGI SEPTIANI",mtk:"36.67",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NICHOLAS",mtk:"43.33",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"JANUAR WAHYU WARDANA",mtk:"33.33",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ASMARIA",mtk:"33.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NUR HASANAH",mtk:"33.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Nimas Alia Tantri",mtk:"43.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"CINTA REGINA PUTRI",mtk:"50.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ANIFA TANIA SAPUTRI",mtk:"30.00",bind:"40.00",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"AL FARIS AMIZAN HASYIM",mtk:"46.67",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NAURA DINAR AFIFAH",mtk:"40.00",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Natasya Kirana Larasati",mtk:"30.00",bind:"60.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"AQIVA ZACINDA",mtk:"46.67",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"QAEFYALD RAYZEL ZAMI",mtk:"43.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Dina Hasna Talita",mtk:"43.33",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Muhammad Kenzo Raditya",mtk:"36.67",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"DESTA PRAMUDITYA",mtk:"23.33",bind:"46.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"DWI HERNASYA FEBRIANA PUTRI",mtk:"46.67",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"REVAN IRWANSYAH",mtk:"33.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FARIZKI ANANDA AMAN",mtk:"53.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"REHAN RAMDANI",mtk:"46.67",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"MELATI RAHMA ATIFA",mtk:"43.33",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Regan Damario",mtk:"36.67",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"PUTRI SALSABILA BACHRI",mtk:"30.00",bind:"26.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"FALISHA MAHIRA",mtk:"36.67",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"SAVIRA HANA",mtk:"43.33",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ISMU ADZAM DETRA KUSUMA",mtk:"53.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RIVANA AZALIA",mtk:"40.00",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FELISSA FETRICIA",mtk:"50.00",bind:"83.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"DHAIFA LATIFAH",mtk:"46.67",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"AZHAR ARLIANSYAH",mtk:"70.00",bind:"56.67",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"Muhammad Shaleh",mtk:"36.67",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Danang Dwi Saputra",mtk:"43.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FIRMAN ZULYAN",mtk:"43.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ZIBRAN ANUGRAH",mtk:"53.33",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KIRAN DIGTA PRATAMA",mtk:"33.33",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ELLEN MUFIIDAH FAJRIYAH",mtk:"50.00",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"PRATAMA EDWIN SAPUTRA",mtk:"43.33",bind:"30.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"M.NOVAL LIANSYAH",mtk:"50.00",bind:"43.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"NABILA AMALIA",mtk:"40.00",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"CANTIKA DELLA SAPUTRI",mtk:"40.00",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NABILA DESKA FITALOKA",mtk:"36.67",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ELISA OLIVIA WIJAYA",mtk:"40.00",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"AFGAN BRILIYAN",mtk:"43.33",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"EZA SEPTU GIANTORO",mtk:"33.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"SABRINA NUR ANGRAINI",mtk:"40.00",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Muhammad Aldi Pratama",mtk:"30.00",bind:"50.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"SANTI SANJAYA",mtk:"33.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"SYARIVATU NADYA",mtk:"50.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Zaskia Maharani",mtk:"20.00",bind:"56.67",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"QORI DWI CAHYANI",mtk:"76.67",bind:"70.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"Muhammad Daffa",mtk:"36.67",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"AHMAD DICKO PRATAMA",mtk:"43.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"JANICE CHALISTA MELANDY",mtk:"43.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MEISSYA HANNY ANGGIA",mtk:"40.00",bind:"43.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"RIZKI GALIH RAMADHAN",mtk:"23.33",bind:"63.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"ELSA SIFARA",mtk:"53.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"BENING ZHAFIRA HUSNA",mtk:"46.67",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"GRACEA CAHYA ENDITA",mtk:"36.67",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"M Aji Satria",mtk:"40.00",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ADITIA FEBRIANTO",mtk:"46.67",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Nabila Riris Aulia",mtk:"36.67",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MUHAMMAD ARYADIL PRATAMA",mtk:"46.67",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KAYSA KAROMAH",mtk:"33.33",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"PANJI PRAYOGA",mtk:"56.67",bind:"50.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"Farel Ubad Ar Rizky",mtk:"36.67",bind:"90.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"DECHIKA RAHMA SABILLA",mtk:"53.33",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"RAYASHI WILDAYU",mtk:"63.33",bind:"66.67",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"REEY RAFAEL RAMADAN",mtk:"33.33",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"DZAKIYY AL KHAIRIY",mtk:"53.33",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Dendy Pratama",mtk:"26.67",bind:"30.00",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"SHAFA ANINDYA KIRANA",mtk:"50.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RIZKI ARIANI",mtk:"33.33",bind:"86.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ANISA TANIA SAPUTRI",mtk:"36.67",bind:"33.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"MUHAMAD AFDAN INDRAWAN",mtk:"33.33",bind:"26.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Rafhael Rizky Andika",mtk:"33.33",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ASYFA NUR MAULIDAH",mtk:"50.00",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Tasya Vania Amanda",mtk:"50.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Muhammad Okan Alfarisi",mtk:"40.00",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"AZAM SAQARA",mtk:"36.67",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"AUDY WULAN SAPURI",mtk:"53.33",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"KESYA SABILA",mtk:"40.00",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"SHESA ANANDA RINDIANI",mtk:"30.00",bind:"46.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"QOLBI HAKIM MAULANA",mtk:"40.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ADIZAH APRILIANA",mtk:"40.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MAHESSA PUTRA",mtk:"56.67",bind:"70.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"RANIA APRIYANTI",mtk:"50.00",bind:"43.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"IBNU RAKHA ANANTA",mtk:"43.33",bind:"100.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"MELISA AULIA PUTRI",mtk:"46.67",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"DEVA SERLIYANI",mtk:"46.67",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NATASYA HERNITA",mtk:"43.33",bind:"83.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"GEVANDER KHALIFA AFARO",mtk:"30.00",bind:"46.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"MUHAMMAD ZIDAN AL FAJAR",mtk:"40.00",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MARSALITA KIRANA PUTRI",mtk:"43.33",bind:"83.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"Anggun Syafa Zakira",mtk:"36.67",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Keyla Salsabila",mtk:"36.67",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"REFFANO FERDINAND",mtk:"50.00",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ARCO MELANDRI PRATAMA",mtk:"33.33",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"RISKI FREDIANSAH",mtk:"33.33",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"EVITA CINTA LAURA",mtk:"30.00",bind:"66.67",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"NAURA BINTANG AURELLIA",mtk:"50.00",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"DINDA RIFKA KHARISMA",mtk:"36.67",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"TB. REHAN . M. AL FATIH",mtk:"33.33",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"M. ILHAM YAHYA",mtk:"10.00",bind:"66.67",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"ROMI ZULLIYAN",mtk:"26.67",bind:"56.67",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"BELLA SAPUTRI",mtk:"33.33",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Raesah Ariyani",mtk:"30.00",bind:"70.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"CINTA LEONIKA",mtk:"43.33",bind:"83.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"CHEYSA ALYA SAFIRA",mtk:"46.67",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"KARISYA ARFIZA",mtk:"30.00",bind:"53.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"REYSA ALLIA PUTRI",mtk:"36.67",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"ALMER LUBAID RAGNAR SHAMASTHA",mtk:"40.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FADHLI NOVANDRA SOPIAN",mtk:"53.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NADIRA CAHYA RAMADANI",mtk:"40.00",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"SALSABILA NAHESA ZAHRA",mtk:"33.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"PUTRA",mtk:"46.67",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Amaliah Endrianingrum",mtk:"43.33",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ANGELICA ISNE KHARISMA",mtk:"40.00",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Annisa Lutfiah",mtk:"36.67",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"YUDHA APTANA PRASASTA",mtk:"33.33",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"SIFA WULAN DARI",mtk:"23.33",bind:"83.33",gMtk:"Kurang",gBind:"Baik"},
+  {nama:"ATIKA MEILINDA",mtk:"30.00",bind:"76.67",gMtk:"Kurang",gBind:"Baik"},
+  {nama:"ADITYA KURNIAWAN",mtk:"43.33",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"CLARISSA EVELY DYNANDA",mtk:"46.67",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Nadine Misselyn Putri",mtk:"33.33",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"MUHAMAD FADLAN ALFARIZKY",mtk:"43.33",bind:"93.33",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"DAFFA FADILLA",mtk:"23.33",bind:"36.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"Fathir Fadilah Ibrahim",mtk:"30.00",bind:"63.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"ANDINI PUTRI FERISA",mtk:"40.00",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NAJWA ASYILA RACHMAN",mtk:"43.33",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Edricko Kenza Alvarukh",mtk:"50.00",bind:"73.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"HAYARA RIFA NAFIZA",mtk:"36.67",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FARHAN ALMER DZAKY",mtk:"23.33",bind:"73.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"BISMA FRANANDA PUTRA",mtk:"30.00",bind:"46.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"GHADI AZZAM NABIHA",mtk:"43.33",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Muhamad Dika Saputra",mtk:"43.33",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"NIKITA ZEZA PUTRI APRIANT",mtk:"23.33",bind:"53.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"Cahya Dwie Maulind",mtk:"33.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Dinda Zahira Putri",mtk:"46.67",bind:"86.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"KIANTAMA ALFARABI",mtk:"46.67",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NUR AURA EKA PUTRI",mtk:"33.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"OKTAVIA INDAH SYAKILA",mtk:"26.67",bind:"56.67",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"WAFIQ AZIZAH AT TANIA",mtk:"43.33",bind:"70.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ULIMA NABILAH",mtk:"30.00",bind:"86.67",gMtk:"Kurang",gBind:"Baik"},
+  {nama:"Nurul fadila",mtk:"33.33",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"FARHAN MUKTI RAMADHANI",mtk:"33.33",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Zahira Aulia Ahzha",mtk:"30.00",bind:"33.33",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"OKTARIA WIJAYA PUTRI",mtk:"46.67",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ZAKY FARHAN",mtk:"20.00",bind:"73.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"KEYSHA PUTRI RAMADHANI",mtk:"36.67",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"NUR HAENY",mtk:"36.67",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MAHDAVIKIA MESSIAS RILKE",mtk:"53.33",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"Erlangga Dias Saputra",mtk:"33.33",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Cinta Anisa Nur Asyifa",mtk:"46.67",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ALYA NAURA",mtk:"46.67",bind:"80.00",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"DEA AULIA",mtk:"40.00",bind:"76.67",gMtk:"Memadai",gBind:"Baik"},
+  {nama:"KARISA OKTAFIANI",mtk:"36.67",bind:"33.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"ZAHWA SYAQILLA",mtk:"80.00",bind:"86.67",gMtk:"Baik",gBind:"Baik"},
+  {nama:"SABRINA AULIA AZZAHRA",mtk:"30.00",bind:"50.00",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"NADIA MUTIARA RAMADHAN",mtk:"33.33",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ANGGER VICO WINATA",mtk:"36.67",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Araya Delicya Dirozy",mtk:"46.67",bind:"66.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MUHAMMAD RISKY",mtk:"16.67",bind:"36.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"ANGGI RAMADHANI",mtk:"40.00",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"MOHAMMAD RIZKI",mtk:"43.33",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ADITIA FIRMANSYAH",mtk:"33.33",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"RAYFI AMAR TAMIMI",mtk:"36.67",bind:"33.33",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"SYAIFUL FAIZ",mtk:"33.33",bind:"36.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"NAZLA MIEVA NABILA",mtk:"26.67",bind:"63.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"CAHAYA ESA PUTRI",mtk:"43.33",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"M. KHADAFY",mtk:"53.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ANDI ARDIANSYAH",mtk:"30.00",bind:"53.33",gMtk:"Kurang",gBind:"Memadai"},
+  {nama:"NAFISA JAUZA AZZAHRA",mtk:"36.67",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"MIZHA CALVIN AZARYA",mtk:"76.67",bind:"83.33",gMtk:"Baik",gBind:"Baik"},
+  {nama:"PANGGIH RIZQY NOPRIYANSYAH",mtk:"60.00",bind:"60.00",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"Alfan Rizqi",mtk:"33.33",bind:"50.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NUR NABILA",mtk:"56.67",bind:"86.67",gMtk:"Baik",gBind:"Baik"},
+  {nama:"NAZWA ANANDITA",mtk:"56.67",bind:"66.67",gMtk:"Baik",gBind:"Memadai"},
+  {nama:"AGUNG RAMADANI",mtk:"36.67",bind:"53.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ALIYA LOLITA",mtk:"40.00",bind:"60.00",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"Muhamad Raffa Naufal",mtk:"33.33",bind:"56.67",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"NAZUAN VEGA PRADITIYA",mtk:"33.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"KINARA CAHYA RIASTI",mtk:"43.33",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"ALLISYA NIKITA MIRDANI",mtk:"40.00",bind:"63.33",gMtk:"Memadai",gBind:"Memadai"},
+  {nama:"REZA FIRMANSYAH",mtk:"26.67",bind:"33.33",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"STENI ALFARO",mtk:"26.67",bind:"46.67",gMtk:"Kurang",gBind:"Kurang"},
+  {nama:"DAVYNA AZZEVYA SENGKEY",mtk:"53.33",bind:"46.67",gMtk:"Memadai",gBind:"Kurang"},
+  {nama:"Muhammad Rehan",mtk:"33.33",bind:"40.00",gMtk:"Memadai",gBind:"Kurang"}
+];
+
+// Process data
+const students = raw.map(s => ({
+  ...s,
+  total: parseFloat(s.mtk) + parseFloat(s.bind)
+}));
+
+const maxTotal = Math.max(...students.map(s => s.total));
+const minTotal = Math.min(...students.map(s => s.total));
+const avgTotal = students.reduce((a,b) => a + b.total, 0) / students.length;
+
+// Update stats
+document.getElementById('statTotal').textContent = students.length;
+document.getElementById('statAvg').textContent = avgTotal.toFixed(1);
+document.getElementById('statTop').textContent = maxTotal.toFixed(1);
+document.getElementById('statLow').textContent = minTotal.toFixed(1);
+
+let sortAsc = false;
+let currentSearch = '';
+
+function toggleSort() {
+  sortAsc = !sortAsc;
+  document.getElementById('sortLabel').textContent = sortAsc ? 'Terkecil → Terbesar' : 'Terbesar → Terkecil';
+  render();
+}
+
+function gradeClass(g) {
+  if (g.includes('Istimewa')) return 'grade-istimewa';
+  if (g === 'Baik') return 'grade-baik';
+  if (g === 'Memadai') return 'grade-memadai';
+  return 'grade-kurang';
+}
+
+function highlightText(text, query) {
+  if (!query) return text;
+  const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+function render() {
+  const q = currentSearch.toLowerCase().trim();
+  let filtered = students.filter(s => s.nama.toLowerCase().includes(q));
+  filtered.sort((a, b) => sortAsc ? a.total - b.total : b.total - a.total);
+
+  const tbody = document.getElementById('tableBody');
+  const noResult = document.getElementById('noResult');
+  const rc = document.getElementById('resultCount');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    noResult.style.display = 'block';
+    rc.textContent = '0 siswa ditemukan';
+    return;
+  }
+
+  noResult.style.display = 'none';
+  rc.textContent = q ? `${filtered.length} dari ${students.length} siswa` : `${students.length} siswa`;
+
+  // Compute dense ranks (no skipped numbers: 1,2,2,3 not 1,2,2,4)
+  const ranks = [];
+  let denseRank = 1;
+  for (let i = 0; i < filtered.length; i++) {
+    if (i === 0) {
+      ranks.push(1);
+    } else if (filtered[i].total === filtered[i-1].total) {
+      ranks.push(ranks[i-1]);
+    } else {
+      denseRank = ranks[i-1] + 1;
+      ranks.push(denseRank);
+    }
+  }
+
+  tbody.innerHTML = filtered.map((s, i) => {
+    const rank = ranks[i];
+    const isTop = !q;
+    let rankClass = '';
+    if (isTop && !sortAsc) {
+      if (rank === 1) rankClass = 'r1';
+      else if (rank === 2) rankClass = 'r2';
+      else if (rank === 3) rankClass = 'r3';
+    }
+
+    const barPct = ((s.total - minTotal) / (maxTotal - minTotal) * 100).toFixed(1);
+    const namaDisplay = highlightText(s.nama, currentSearch);
+    const creatorTag = s.isCreator ? '<span class="creator-tag">⭐ Pembuat</span>' : '';
+    const rowClass = s.isCreator ? 'highlight-creator' : '';
+
+    return `<tr class="${rowClass}" style="animation-delay:${Math.min(i*0.015,0.3)}s">
+      <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+      <td class="nama-cell">${namaDisplay}${creatorTag}</td>
+      <td><span class="score-pill ${gradeClass(s.gMtk)}">${s.mtk}</span></td>
+      <td><span class="score-pill ${gradeClass(s.gBind)}">${s.bind}</span></td>
+      <td class="num-col">
+        <div class="total-cell">
+          <span class="total-val">${s.total.toFixed(1)}</span>
+          <div class="total-bar-bg"><div class="total-bar" style="width:${barPct}%"></div></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  currentSearch = this.value;
+  render();
+});
+
+// Scroll to top button
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTop');
+  if (window.scrollY > 400) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+});
+
+// Popup
+function closePopup() {
+  const overlay = document.getElementById('popupOverlay');
+  overlay.classList.add('popup-overlay-exit');
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+}
+
+render();
+</script>
+</body>
+</html>
